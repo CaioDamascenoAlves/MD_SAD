@@ -15,12 +15,12 @@ conn2.autocommit = True
 cursor2 = conn2.cursor()
 
 # Criando um novo banco de dados PostgreSQL
-cursor2.execute("DROP DATABASE IF EXISTS bdmodelstar")
-cursor2.execute("CREATE DATABASE bdstarmodel")
+cursor2.execute("DROP DATABASE IF EXISTS dados_epidemiologicos")
+cursor2.execute("CREATE DATABASE bd_epidemiologicos")
 conn2.commit()
 
 # conectando ao novo banco de dados PostgreSQL
-conn2 = psycopg2.connect("dbname=bdstarmodel user=postgres password=postgres host=localhost port=5432")
+conn2 = psycopg2.connect("dbname=bd_epidemiologicos user=postgres password=postgres host=localhost port=5432")
 cursor2 = conn2.cursor()
 
 # criando tabelas de dimensão
@@ -110,14 +110,14 @@ def populate_tables(data):
             place_type_id = place_type_dict[place_type_name]
         # verificando se o data já está no dicionário
         if date not in date_dict:
-            cursor2.execute("INSERT INTO date (date, epidemiological_week) VALUES (%s,%s) RETURNING date_id", (date,epidemiological_week))
+            cursor2.execute("INSERT INTO date (date, epidemiological_week) VALUES (%s,%s) RETURNING date_id", (date,epidemiological_week,))
             date_id = cursor2.fetchone()[0]
             date_dict[date] = date_id
         else:
             date_id = date_dict[date]
 
         # inserindo informações na tabela de fato
-        cursor2.execute("INSERT INTO fact (city_id, state_id, place_type_id, new_confirmed, new_deaths) VALUES (%s, %s, %s, %s, %s)", (city_id, state_id, place_type_id, new_confirmed, new_deaths))
+        cursor2.execute("INSERT INTO fact (city_id, state_id, place_type_id, date_id, new_confirmed, new_deaths) VALUES (%s, %s, %s, %s, %s, %s)", (city_id, state_id, place_type_id, date_id, new_confirmed, new_deaths))
 
     conn2.commit()
 
